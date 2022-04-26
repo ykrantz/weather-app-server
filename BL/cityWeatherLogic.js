@@ -11,15 +11,16 @@ const getCityWeather = async (cityName, country) => {
 
   // const city_id = await citylogic.getCityDetails(cityName, country).data?._id;
   const city_id = await citylogic.getCity_id(cityName, country);
+  console.log("$##$", { city_id });
   let cityWeatherDetails = "";
 
   if (city_id) {
-    const filter = { _id: city_id };
+    const filter = { city: city_id };
     cityWeatherDetails = await cityWeather.readOne(filter);
     if (
       cityWeatherDetails?.updatedAt.toDateString() === new Date().toDateString()
     ) {
-      console.log("have update weather in DB");
+      console.log("have already  update weather in DB");
       return new Respond(200, cityWeatherDetails);
       // return { code: 200, data: cityWeatherDetails };
     } else {

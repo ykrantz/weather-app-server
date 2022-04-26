@@ -3,7 +3,7 @@ const cors = require("cors");
 const bodyParser = require("body-parser");
 
 const cityRoute = require("./Routes/cityRoute");
-// const cityWeatherRoute = require("./Routes/cityWeatherRoute");
+const cityWeatherRoute = require("./Routes/cityWeatherRoute");
 
 require("dotenv").config();
 
@@ -17,6 +17,7 @@ app.use(bodyParser.urlencoded({ extended: false }));
 app.use(cors());
 
 app.use("/api/city", cityRoute);
+app.use("/api/cityWeather", cityWeatherRoute);
 // app.use("/api/city", cityWeatherRoute);
 
 require("./DL/db")

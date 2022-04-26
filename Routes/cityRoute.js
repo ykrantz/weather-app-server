@@ -4,6 +4,22 @@ const city = require("../BL/cityLogic");
 
 router.get("/", async (req, res) => {
   try {
+    console.log("###");
+    const cityName = req.query.city;
+    const country = req.query.country;
+    console.log({ cityName });
+    const cityDetails = await city.getCityDetails(cityName, country);
+
+    console.log(cityDetails);
+    res.status(cityDetails.code).json(cityDetails.data || cityDetails.message);
+  } catch (e) {
+    console.log(e);
+    res.status(500).json({ message: "internal server eror" });
+  }
+});
+
+router.get("/allcity", async (req, res) => {
+  try {
     const citiesList = await city.getCitiesList();
 
     console.log(citiesList);
@@ -13,19 +29,4 @@ router.get("/", async (req, res) => {
     res.status(500).json({ message: "internal server eror" });
   }
 });
-
-router.get("/:city", async (req, res) => {
-  try {
-    const cityName = req.params.city;
-    console.log({ cityName });
-    const cityDetails = await city.getCityDetails(cityName);
-
-    console.log(cityDetails);
-    res.status(cityDetails.code).json(cityDetails.data);
-  } catch (e) {
-    console.log(e);
-    res.status(500).json({ message: "internal server eror" });
-  }
-});
-
 module.exports = router;

@@ -21,7 +21,7 @@ const create = async (newData) => {
 };
 
 const update = async (id, updatedData) => {
-  return await dayWeather.findByIdAndUpdate(id, updatedData);
+  return await dayWeather.findByIdAndUpdate(id, updatedData, { new: true });
 };
 
 const deleteOne = async (id) => {

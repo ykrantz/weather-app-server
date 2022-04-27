@@ -4,6 +4,8 @@ const cityWeather = require("../DL/controllers/cityWeatherController");
 const citylogic = require("../BL/cityLogic");
 const { city } = require("../DL/models/IndexModel");
 
+const HOURS_DELTA_TO_UPDATE = 6;
+
 const RAPID_API_KEY = process.env.RAPID_API_KEY;
 
 const getCityWeather = async (cityName, country) => {
@@ -11,31 +13,33 @@ const getCityWeather = async (cityName, country) => {
 
   // const city_id = await citylogic.getCityDetails(cityName, country).data?._id;
   const city_id = await citylogic.getCity_id(cityName, country);
-  console.log("$##$", { city_id });
   let cityWeatherDetails = "";
-
+  // console.log({ city_id }, "222");
   if (city_id) {
-    const filter = { city: city_id };
+    const filter = { city: city_id.toString() };
     cityWeatherDetails = await cityWeather.readOne(filter);
+
     if (
-      cityWeatherDetails?.updatedAt.toDateString() === new Date().toDateString()
+      hoursDifrance(Date.now(), cityWeatherDetails?.updatedAt.getTime()) <=
+      HOURS_DELTA_TO_UPDATE
+      // cityWeatherDetails?.updatedAt.toDateString() === new Date().toDateString()
     ) {
       console.log("have already  update weather in DB");
       return new Respond(200, cityWeatherDetails);
       // return { code: 200, data: cityWeatherDetails };
     } else {
-      console.log("data isn't update. will look from API");
+      console.log("data in DB isn't update. will look from API");
 
       // get details from server and update DB:
-      cityWeatherDetails = await getCityWeatherFromServerAndUpdateDb(
+      cityWeatherDetails = await getCityWeatherFromApiAndUpdateDb(
         cityName,
         country
       );
     }
   } else {
-    console.log("##city isn't in DB. will look from API##");
+    console.log("city isn't in DB. will look from API");
     // get details from server and update DB:
-    cityWeatherDetails = await getCityWeatherFromServerAndUpdateDb(
+    cityWeatherDetails = await getCityWeatherFromApiAndUpdateDb(
       cityName,
       country
     );
@@ -54,8 +58,14 @@ const getCityWeather = async (cityName, country) => {
 
 // side functions:
 
-const getCityWeatherFromServerAndUpdateDb = async (cityName, country) => {
-  const cityWeatherDitails = await getCityWeatherFromServer(cityName, country);
+const getCityWeatherFromApiAndUpdateDb = async (cityName, country) => {
+  const cityWeatherDitails = await getCityWeatherFromApi(cityName, country);
+
+  if (!cityWeatherDitails) {
+    console.log("didn't find city weather in API");
+    return false;
+  }
+
   const updateCityWeather = await updateCityWeatherInDb(cityWeatherDitails);
   // console.log({updateCityWeather});
   return cityWeatherDitails;
@@ -63,16 +73,15 @@ const getCityWeatherFromServerAndUpdateDb = async (cityName, country) => {
 
 const updateCityWeatherInDb = async (data) => {
   // look fot city _ID
-  console.log("&&&");
   const { id, name, coord, country, population, timezone } = data.city;
-
+  // console.log({ name, coord, country });
   let city_id = await citylogic.getCity_id(name, country);
 
-  // console.log({ city_id });
   let updatedCityWeather = "";
   // if city doesnt exist => create city
 
   if (!city_id) {
+    console.log("didn't find city in server");
     const cityDetails = { id, name, coord, country, population, timezone };
     cityDetails.name = cityDetails.name.toLowerCase();
     cityDetails.country = cityDetails.country.toLowerCase();
@@ -96,9 +105,11 @@ const updateCityWeatherInDb = async (data) => {
       updatedCityWeather = await cityWeather.update(city_id, {
         daysWeather: data.list,
       });
+
       console.log("cityweather was upddated in server :");
     } else {
       // if city weather never was update in server
+      console.log("no record of weater city in server");
       updatedCityWeather = await cityWeather.create(newData);
       console.log("cityweather was created  in server :", { newCity });
     }
@@ -107,7 +118,7 @@ const updateCityWeatherInDb = async (data) => {
   return updatedCityWeather;
 };
 
-const getCityWeatherFromServer = (cityName, country) => {
+const getCityWeatherFromApi = (cityName, country) => {
   const axios = require("axios");
 
   const options = {
@@ -136,6 +147,10 @@ const getCityWeatherFromServer = (cityName, country) => {
       console.log("Eror");
       console.error(error);
     });
+};
+
+const hoursDifrance = (start, end) => {
+  return Math.abs(end - start) / 36e10;
 };
 
 module.exports = { getCityWeather };

@@ -37,3 +37,29 @@ module.exports = {
   update,
   deleteOne,
 };
+
+// test:
+
+// test
+
+// require("../db")
+//   .connect()
+//   .then(() => {
+//     console.log("***connected succsesfuly to DB***");
+//   });
+
+// const testFunc = async () => {
+//   // const tst = new ObjectId("6269776952765d09814f9106");
+//   const cityWeat = await readOne({
+//     city: "6269776952765d09814f9106",
+//     // city: tst.toString(),
+//   });
+//   console.log({ cityWeat });
+//   // const dityDet = await city.readOne({ _id: cityId });
+//   // console.log("@@@@@", { dityDet });
+
+//   // const dityDet2 = await getCityDetails("london", "gb");
+//   // console.log({ dityDet2 });
+// };
+
+// testFunc();

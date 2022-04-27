@@ -15,14 +15,15 @@ const getCitiesList = async () => {
 const getCity_id = async (cityName, country) => {
   const filter = country
     ? {
-        name: cityName,
-        country: country,
+        name: cityName.toLowerCase(),
+        country: country.toLowerCase(),
       }
     : {
         name: cityName,
       };
   const cityDetails = await city.readOne(filter);
-  const city_id = cityDetails?._id.toString();
+  console.log("found city id ");
+  const city_id = cityDetails?._id;
 
   if (city_id) {
     return city_id;
@@ -34,30 +35,18 @@ const getCity_id = async (cityName, country) => {
 const getCityDetails = async (cityName, country) => {
   const filter = country
     ? {
-        name: cityName,
-        country: country,
+        name: cityName.toLowerCase(),
+        country: country.toLowerCase(),
       }
     : {
-        name: cityName,
+        name: cityName.toLowerCase(),
       };
 
-  // const filter = country
-  //   ? {
-  //       name: "london",
-  //       country: "gb",
-  //     }
-  //   : {
-  //       name: "london",
-  //     };
-  // console.log("^^^", { filter });
-
   const cityDetails = await city.readOne(filter);
-  // console.log("^^^^", { cityDetails });
+
   if (cityDetails) {
-    // return { code: 200, data: cityDetails };
     return new Respond(200, cityDetails);
   } else {
-    // return { code: 404, data: "city wasn't found" };
     return new Respond(404, "", "city wasn't found");
   }
 };
@@ -68,3 +57,23 @@ const createCity = (cityName, country) => {
 };
 
 module.exports = { getCitiesList, getCityDetails, getCity_id };
+
+// test
+
+// require("../DL/db")
+//   .connect()
+//   .then(() => {
+//     console.log("***connected succsesfuly to DB***");
+//   });
+
+// const testFunc = async () => {
+//   const cityId = await getCity_id("london", "gb");
+//   console.log({ cityId });
+//   const dityDet = await city.readOne({ _id: cityId });
+//   console.log("@@@@@", { dityDet });
+
+//   const dityDet2 = await getCityDetails("london", "gb");
+//   console.log({ dityDet2 });
+// };
+
+// testFunc();

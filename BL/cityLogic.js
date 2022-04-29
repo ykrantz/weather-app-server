@@ -12,15 +12,8 @@ const getCitiesList = async () => {
   }
 };
 
-const getCity_id = async (cityName, country) => {
-  const filter = country
-    ? {
-        name: cityName.toLowerCase(),
-        country: country.toLowerCase(),
-      }
-    : {
-        name: cityName,
-      };
+const getCity_id = async (cityName) => {
+  const filter = { name: cityName };
   const cityDetails = await city.readOne(filter);
   console.log("found city id ");
   const city_id = cityDetails?._id;
@@ -46,15 +39,10 @@ const getCity_idByid = async (id) => {
   }
 };
 
-const getCityDetails = async (cityName, country) => {
-  const filter = country
-    ? {
-        name: cityName.toLowerCase(),
-        country: country.toLowerCase(),
-      }
-    : {
-        name: cityName.toLowerCase(),
-      };
+const getCityDetails = async (cityName) => {
+  const filter = {
+    name: cityName.toLowerCase(),
+  };
 
   const cityDetails = await city.readOne(filter);
 

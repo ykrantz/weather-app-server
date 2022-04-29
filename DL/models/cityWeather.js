@@ -3,13 +3,7 @@ const mongoose = require("mongoose");
 const cityWeahterSchema = new mongoose.Schema(
   {
     city: { type: mongoose.SchemaTypes.ObjectId, ref: "city", required: true },
-    // daysWeather: [
-    //   {
-    //     type: mongoose.SchemaTypes.ObjectId,
-    //     ref: "dayWeather",
-    //     required: true,
-    //   },
-    // ],
+
     daysWeather: [],
   },
 

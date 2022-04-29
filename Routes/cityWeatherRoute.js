@@ -20,16 +20,12 @@ router.get("/cityid/:id", async (req, res) => {
 });
 
 // get city by name:
-router.get("/cityname/", async (req, res) => {
+router.get("/cityname/:city", async (req, res) => {
   try {
     console.log("###");
-    const cityName = req.query.city;
-    const country = req.query.country;
+    const cityName = req.params.city;
     console.log({ cityName });
-    const cityWeatherDetails = await cityWeather.getCityWeather(
-      cityName,
-      country
-    );
+    const cityWeatherDetails = await cityWeather.getCityWeather(cityName);
 
     // console.log(cityWeatherDetails);
     res

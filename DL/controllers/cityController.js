@@ -38,7 +38,7 @@ module.exports = {
   deleteOne,
 };
 
-// // test:
+// test:
 // require("dotenv").config();
 // require("../db").connect();
 

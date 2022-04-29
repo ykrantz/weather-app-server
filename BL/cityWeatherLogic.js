@@ -17,7 +17,11 @@ const getCityWeather = async (cityName, country) => {
   // console.log({ city_id }, "222");
   if (city_id) {
     const filter = { city: city_id.toString() };
-    cityWeatherDetails = await cityWeather.readOne(filter);
+    cityWeatherDetails = await cityWeather.readOneAndPopulate(
+      filter,
+      "",
+      "city"
+    );
 
     if (
       hoursDifrance(Date.now(), cityWeatherDetails?.updatedAt.getTime()) <=
@@ -65,12 +69,12 @@ const getCityWeatherById = async (id) => {
   // console.log({ city_id }, "222");
   if (city_id) {
     const filter = { city: city_id.toString() };
-    cityWeatherDetails = await cityWeather.readOne(filter);
-    // cityWeatherDetails = await cityWeather.readOneAndPopulate(
-    //   filter,
-    //   "",
-    //   "city"
-    // );
+    // cityWeatherDetails = await cityWeather.readOne(filter);
+    cityWeatherDetails = await cityWeather.readOneAndPopulate(
+      filter,
+      "",
+      "city"
+    );
 
     if (
       hoursDifrance(Date.now(), cityWeatherDetails?.updatedAt.getTime()) <=
@@ -120,8 +124,14 @@ const getCityWeatherFromApiAndUpdateDb = async (cityName, country) => {
   }
 
   const updateCityWeather = await updateCityWeatherInDb(cityWeatherDitails);
+  console.log("city weather was update in server");
+  const cityWeatherDetails = await cityWeather.readOneAndPopulate(
+    filter,
+    "",
+    "city"
+  );
   // console.log({updateCityWeather});
-  return cityWeatherDitails;
+  return cityWeatherDetails;
 };
 
 const updateCityWeatherInDb = async (data) => {
@@ -131,6 +141,7 @@ const updateCityWeatherInDb = async (data) => {
   let city_id = await citylogic.getCity_id(name, country);
 
   let updatedCityWeather = "";
+
   // if city doesnt exist => create city
 
   if (!city_id) {
@@ -139,11 +150,12 @@ const updateCityWeatherInDb = async (data) => {
     cityDetails.name = cityDetails.name.toLowerCase();
     cityDetails.country = cityDetails.country.toLowerCase();
 
+    //  create city:
     const newCity = await city.create(cityDetails);
     console.log("city was created :", { newCity });
     city_id = newCity._id;
 
-    // update date in server
+    // update date in server:
     const newData = {
       city: city_id,
       daysWeather: data.list,

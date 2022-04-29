@@ -32,6 +32,20 @@ const getCity_id = async (cityName, country) => {
   }
 };
 
+const getCity_idByid = async (id) => {
+  const filter = { id };
+
+  const cityDetails = await city.readOne(filter);
+  console.log("found city id ");
+  const city_id = cityDetails?._id;
+
+  if (city_id) {
+    return city_id;
+  } else {
+    return false;
+  }
+};
+
 const getCityDetails = async (cityName, country) => {
   const filter = country
     ? {
@@ -56,7 +70,7 @@ const createCity = (cityName, country) => {
   const newCity = city.create(cityDetails);
 };
 
-module.exports = { getCitiesList, getCityDetails, getCity_id };
+module.exports = { getCitiesList, getCityDetails, getCity_id, getCity_idByid };
 
 // test
 

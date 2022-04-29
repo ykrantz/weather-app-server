@@ -56,6 +56,59 @@ const getCityWeather = async (cityName, country) => {
   }
 };
 
+const getCityWeatherById = async (id) => {
+  // TODO: to check why when the city exist it creates another city. problum with the finding od city
+
+  // const city_id = await citylogic.getCityDetails(cityName, country).data?._id;
+  const city_id = await citylogic.getCity_idByid(id);
+  let cityWeatherDetails = "";
+  // console.log({ city_id }, "222");
+  if (city_id) {
+    const filter = { city: city_id.toString() };
+    cityWeatherDetails = await cityWeather.readOne(filter);
+    // cityWeatherDetails = await cityWeather.readOneAndPopulate(
+    //   filter,
+    //   "",
+    //   "city"
+    // );
+
+    if (
+      hoursDifrance(Date.now(), cityWeatherDetails?.updatedAt.getTime()) <=
+      HOURS_DELTA_TO_UPDATE
+      // cityWeatherDetails?.updatedAt.toDateString() === new Date().toDateString()
+    ) {
+      console.log("have already  update weather in DB");
+      return new Respond(200, cityWeatherDetails);
+      // return { code: 200, data: cityWeatherDetails };
+    } else {
+      console.log("data in DB isn't update. will look from API");
+
+      // get details from server and update DB:
+      cityWeatherDetails = await getCityWeatherFromApiAndUpdateDb(
+        cityName,
+        country
+      );
+    }
+  } else {
+    console.log("city isn't in DB. will look from API");
+    // get details from server and update DB:
+    cityWeatherDetails = await getCityWeatherFromApiAndUpdateDb(
+      cityName,
+      country
+    );
+  }
+
+  //  if city weather is found in db and is update to today => send res
+
+  if (cityWeatherDetails) {
+    // return { code: 200, data: cityDetails };
+    return new Respond(200, cityWeatherDetails);
+  } else {
+    // return { code: 404, data: "city wasn't found" };
+    return new Respond(404, "", "city wasn't found");
+  }
+};
+
 // side functions:
 
 const getCityWeatherFromApiAndUpdateDb = async (cityName, country) => {
@@ -153,4 +206,4 @@ const hoursDifrance = (start, end) => {
   return Math.abs(end - start) / 36e10;
 };
 
-module.exports = { getCityWeather };
+module.exports = { getCityWeather, getCityWeatherById };

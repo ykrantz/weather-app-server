@@ -29,4 +29,17 @@ router.get("/allcity", async (req, res) => {
     res.status(500).json({ message: "internal server eror" });
   }
 });
+
+router.get("/searchcity/:serachstr", async (req, res) => {
+  try {
+    const serachStr = req.params.serachstr;
+
+    const citiesStrResults = await city.searchCitiesByString(serachStr);
+    res.status(citiesStrResults.code).json(citiesStrResults.data);
+  } catch (e) {
+    console.log(e);
+    res.status(500).json({ message: "internal server eror" });
+  }
+});
+
 module.exports = router;

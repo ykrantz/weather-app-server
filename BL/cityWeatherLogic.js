@@ -3,17 +3,15 @@ const Respond = require("../Utils/respondFormat");
 const cityWeather = require("../DL/controllers/cityWeatherController");
 const citylogic = require("../BL/cityLogic");
 const { city } = require("../DL/models/IndexModel");
-
+const getCityWeatherFromApi = require("../Utils/weatherApiYahoo");
 const HOURS_DELTA_TO_UPDATE = 6;
 
-const RAPID_API_KEY_YAHOO = process.env.RAPID_API_KEY_YAHOO;
-
 const getCityWeather = async (cityName) => {
-  // TODO: to check why when the city exist it creates another city. problum with the finding od city
   cityName = cityName.toLowerCase();
   const city_id = await citylogic.getCity_id(cityName);
   let cityWeatherDetails = "";
   if (city_id) {
+    // if city exist in DB:
     const filter = { city: city_id.toString() };
     cityWeatherDetails = await cityWeather.readOneAndPopulate(
       filter,
@@ -26,16 +24,20 @@ const getCityWeather = async (cityName) => {
       HOURS_DELTA_TO_UPDATE
       // cityWeatherDetails?.updatedAt.toDateString() === new Date().toDateString()
     ) {
+      // if city weather already update in server:
       console.log("have already  update weather in DB");
       return new Respond(200, cityWeatherDetails);
       // return { code: 200, data: cityWeatherDetails };
     } else {
+      // if city weather isn't update in server, we need to get details and update:
       console.log("data in DB isn't update. will look from API");
 
       // get details from server and update DB:
       cityWeatherDetails = await getCityWeatherFromApiAndUpdateDb(cityName);
     }
   } else {
+    // if city  isn't exist in server, we need to create a new city and then get details and update in DB:
+
     console.log("city isn't in DB. will look from API");
     // get details from server and update DB:
     cityWeatherDetails = await getCityWeatherFromApiAndUpdateDb(cityName);
@@ -53,8 +55,6 @@ const getCityWeather = async (cityName) => {
 };
 
 const getCityWeatherById = async (id) => {
-  // TODO: to check why when the city exist it creates another city. problum with the finding od city
-
   const city_id = await citylogic.getCity_idByid(id);
   let cityWeatherDetails = "";
   // console.log({ city_id }, "222");
@@ -102,11 +102,13 @@ const getCityWeatherById = async (id) => {
 
 const getCityWeatherFromApiAndUpdateDb = async (cityName) => {
   const cityWeatherDitails = await getCityWeatherFromApi(cityName);
-  console.log(cityWeatherDitails.location.city, { cityName });
-  // note: if there is exact name of city in API it return random city. so we need  to compare to the original name
-  if (
-    !cityWeatherDitails ||
-    cityWeatherDitails.location.city.toLowerCase() != cityName.trim()
+  if (!cityWeatherDitails) {
+    // if cuty does't exist in api:
+    console.log("didn't find city weather in API");
+    return false;
+  } else if (
+    // note: if there is exact name of city in API , the API returns a random city. so we need  to compare to the original name
+    cityWeatherDitails?.location.city.toLowerCase() != cityName.trim()
   ) {
     console.log("didn't find city weather in API");
     return false;
@@ -114,20 +116,21 @@ const getCityWeatherFromApiAndUpdateDb = async (cityName) => {
 
   const updateCityWeather = await updateCityWeatherInDb(cityWeatherDitails);
   console.log("city weather was update in server");
-  const filter = { name: cityName };
+  const filter = { _id: updateCityWeather._id };
+  //  get the updated ditails from DB and populate:
   const cityWeatherDetails = await cityWeather.readOneAndPopulate(
     filter,
     "",
     "city"
   );
-  // console.log({updateCityWeather});
+
   return cityWeatherDetails;
 };
 
 // TODO: upate inpur to DB
 
 const updateCityWeatherInDb = async (data) => {
-  // look fot city _ID
+  // look for city _ID
   const { region, woeid, country, lat, long, timezone_id } = data.location;
   let city_id = await citylogic.getCity_id(city);
 
@@ -136,7 +139,7 @@ const updateCityWeatherInDb = async (data) => {
   // if city doesnt exist => create city
 
   if (!city_id) {
-    console.log("didn't find city in server");
+    console.log("didn't find city in DB. will create city");
     const cityDetails = {
       name: data.location.city,
       region,
@@ -163,7 +166,7 @@ const updateCityWeatherInDb = async (data) => {
     };
 
     updatedCityWeather = await cityWeather.create(newData);
-    console.log("cityweather was created  in server");
+    console.log("cityweather was created  in DB");
   } else {
     const cityWeather_id = cityWeather.readOne({ city: city_id });
 
@@ -180,40 +183,11 @@ const updateCityWeatherInDb = async (data) => {
       console.log("cityweather was created  in server");
     }
   }
-
   return updatedCityWeather;
 };
 
-//  API of yahoo:
-
-const getCityWeatherFromApi = (cityName, units = "c") => {
-  const axios = require("axios");
-
-  const options = {
-    method: "GET",
-    url: "https://yahoo-weather5.p.rapidapi.com/weather",
-    params: { location: cityName, format: "json", u: units },
-    headers: {
-      "X-RapidAPI-Host": "yahoo-weather5.p.rapidapi.com",
-      "X-RapidAPI-Key": RAPID_API_KEY_YAHOO,
-    },
-  };
-
-  return axios
-    .request(options)
-    .then(function (response) {
-      // console.log(response.data);
-      const details = response.data;
-      return details;
-    })
-    .catch(function (error) {
-      console.log("Eror");
-      console.error(error);
-    });
-};
-
 const hoursDifrance = (start, end) => {
-  return Math.abs(end - start) / 36e10;
+  return Math.abs(end - start) / 36e5;
 };
 
 module.exports = { getCityWeather, getCityWeatherById };

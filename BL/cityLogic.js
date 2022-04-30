@@ -1,5 +1,32 @@
 const city = require("../DL/controllers/cityController");
 const Respond = require("../Utils/respondFormat");
+const searchCitiesFromApi = require("../Utils/citiesApiSpot");
+
+const searchCitiesByString = async (searchStr) => {
+  const searchResults = await searchCitiesFromApi(searchStr);
+  const cityNameResults = searchResults.map((val) => val.name);
+
+  // Api results includes also results that doesn't have exact string in name
+  const cityFilteredResults = cityNameResults.filter((val) =>
+    val.toLowerCase().includes(searchStr.toLowerCase())
+  );
+  // remove duplicate results
+  const cityUnicResults = cityFilteredResults.filter(
+    (val, idx, arr) => arr.indexOf(val) === idx
+  );
+  console.log(
+    { cityFilteredResults },
+    { cityNameResults },
+    { cityUnicResults }
+  );
+  if (cityUnicResults.length) {
+    return new Respond(200, cityUnicResults);
+    // return { code: 200, data: citiesList };
+  } else {
+    // return { code: 404, data: "no cities wasn't found" };
+    return new Respond(404, "", "no cities wasn't found");
+  }
+};
 
 const getCitiesList = async () => {
   const citiesList = await city.read();
@@ -58,7 +85,13 @@ const createCity = (cityName, country) => {
   const newCity = city.create(cityDetails);
 };
 
-module.exports = { getCitiesList, getCityDetails, getCity_id, getCity_idByid };
+module.exports = {
+  getCitiesList,
+  getCityDetails,
+  getCity_id,
+  getCity_idByid,
+  searchCitiesByString,
+};
 
 // test
 

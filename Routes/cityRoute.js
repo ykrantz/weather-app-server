@@ -7,7 +7,7 @@ router.get("/", async (req, res) => {
     console.log("###");
     const cityName = req.query.city;
     const country = req.query.country;
-    console.log({ cityName });
+    // console.log({ cityName });
     const cityDetails = await city.getCityDetails(cityName, country);
 
     console.log(cityDetails);
@@ -22,7 +22,6 @@ router.get("/allcity", async (req, res) => {
   try {
     const citiesList = await city.getCitiesList();
 
-    console.log(citiesList);
     res.status(citiesList.code).json(citiesList.data);
   } catch (e) {
     console.log(e);

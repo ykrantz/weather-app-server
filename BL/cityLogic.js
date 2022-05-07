@@ -8,7 +8,6 @@ const searchCitiesFromApi = require("../Utils/citiesApiSpot");
 const searchCitiesByString = async (searchStr) => {
   // check if it was search before and there is results from DB:
   const searchResultsFromDb = await await citySearch.readOne({ searchStr });
-  console.log("###", { searchResultsFromDb });
   let searchResults = searchResultsFromDb?.cityResults;
 
   if (!searchResults) {
@@ -21,7 +20,7 @@ const searchCitiesByString = async (searchStr) => {
       searchStr,
       cityResults: searchResults,
     });
-    console.log({ updateSearchCityResultsInDb });
+    // console.log({ updateSearchCityResultsInDb });
   } else {
     console.log("found search in DB");
   }

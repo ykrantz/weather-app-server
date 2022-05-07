@@ -6,7 +6,7 @@ const cityWeather = require("../BL/cityWeatherLogic");
 router.get("/cityid/:id", async (req, res) => {
   try {
     const id = req.params.id;
-    console.log({ id });
+    // console.log({ id });
     const cityWeatherDetails = await cityWeather.getCityWeatherById(id);
 
     // console.log(cityWeatherDetails);
@@ -24,8 +24,8 @@ router.get("/cityname/:city", async (req, res) => {
   try {
     console.log("###");
     const cityName = req.params.city;
-    console.log({ cityName });
-    const cityWeatherDetails = await cityWeather.getCityWeather(cityName);
+    // console.log({ cityName });
+    const cityWeatherDetails = await cityWeather.getCityWeatherByName(cityName);
 
     // console.log(cityWeatherDetails);
     res

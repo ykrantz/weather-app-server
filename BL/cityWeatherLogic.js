@@ -6,12 +6,15 @@ const { city } = require("../DL/models/IndexModel");
 const getCityWeatherFromApi = require("../Utils/weatherApiYahoo");
 const HOURS_DELTA_TO_UPDATE = 6;
 
-const getCityWeather = async (cityName) => {
+const getCityWeatherByName = async (cityName) => {
   cityName = cityName.toLowerCase();
   const city_id = await citylogic.getCity_id(cityName);
+  // console.log({ city_id }, "5555");
   let cityWeatherDetails = "";
+
   if (city_id) {
     // if city exist in DB:
+    console.log("city exsist in DB");
     const filter = { city: city_id.toString() };
     cityWeatherDetails = await cityWeather.readOneAndPopulate(
       filter,
@@ -116,6 +119,7 @@ const getCityWeatherFromApiAndUpdateDb = async (cityName) => {
 
   const updateCityWeather = await updateCityWeatherInDb(cityWeatherDitails);
   console.log("city weather was update in server");
+
   const filter = { _id: updateCityWeather._id };
   //  get the updated ditails from DB and populate:
   const cityWeatherDetails = await cityWeather.readOneAndPopulate(
@@ -131,15 +135,18 @@ const getCityWeatherFromApiAndUpdateDb = async (cityName) => {
 
 const updateCityWeatherInDb = async (data) => {
   // look for city _ID
+  // console.log(data.location, "loc");
   const { region, woeid, country, lat, long, timezone_id } = data.location;
-  let city_id = await citylogic.getCity_id(city);
-
+  const cityName = data?.location?.city.toLowerCase();
+  // console.log({ cityName }, "****", data.location);
+  let city_id = await citylogic.getCity_id(cityName);
+  // console.log({ city_id });
   let updatedCityWeather = "";
 
   // if city doesnt exist => create city
 
   if (!city_id) {
-    console.log("didn't find city in DB. will create city");
+    console.log("didn't find city in DB. will create city", "^^^^");
     const cityDetails = {
       name: data.location.city,
       region,
@@ -149,7 +156,7 @@ const updateCityWeatherInDb = async (data) => {
       long,
       timezone_id,
     };
-    console.log({ cityDetails }, "$$$");
+    // console.log({ cityDetails }, "$$$");
 
     cityDetails.name = cityDetails.name.toLowerCase();
     cityDetails.country = cityDetails.country.toLowerCase();
@@ -168,6 +175,7 @@ const updateCityWeatherInDb = async (data) => {
     updatedCityWeather = await cityWeather.create(newData);
     console.log("cityweather was created  in DB");
   } else {
+    console.log("city was already exist in DB", "****");
     const cityWeather_id = cityWeather.readOne({ city: city_id });
 
     if (cityWeather_id) {
@@ -190,4 +198,4 @@ const hoursDifrance = (start, end) => {
   return Math.abs(end - start) / 36e5;
 };
 
-module.exports = { getCityWeather, getCityWeatherById };
+module.exports = { getCityWeatherByName, getCityWeatherById };

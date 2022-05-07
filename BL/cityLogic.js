@@ -1,9 +1,31 @@
 const city = require("../DL/controllers/cityController");
+const citySearch = require("../DL/controllers/citySearchController");
 const Respond = require("../Utils/respondFormat");
 const searchCitiesFromApi = require("../Utils/citiesApiSpot");
 
+// search from CitiesApi:
+
 const searchCitiesByString = async (searchStr) => {
-  const searchResults = await searchCitiesFromApi(searchStr);
+  // check if it was search before and there is results from DB:
+  const searchResultsFromDb = await await citySearch.readOne({ searchStr });
+  console.log("###", { searchResultsFromDb });
+  let searchResults = searchResultsFromDb?.cityResults;
+
+  if (!searchResults) {
+    // if wasn't found in DB. search from API:
+    console.log("did't find search in DB. will look in api");
+    searchResults = await searchCitiesFromApi(searchStr);
+
+    // update DB with results:
+    const updateSearchCityResultsInDb = await citySearch.create({
+      searchStr,
+      cityResults: searchResults,
+    });
+    console.log({ updateSearchCityResultsInDb });
+  } else {
+    console.log("found search in DB");
+  }
+
   const cityNameResults = searchResults.map((val) => val.name);
 
   // Api results includes also results that doesn't have exact string in name
@@ -14,11 +36,11 @@ const searchCitiesByString = async (searchStr) => {
   const cityUnicResults = cityFilteredResults.filter(
     (val, idx, arr) => arr.indexOf(val) === idx
   );
-  console.log(
-    { cityFilteredResults },
-    { cityNameResults },
-    { cityUnicResults }
-  );
+  // console.log(
+  //   { cityFilteredResults },
+  //   { cityNameResults },
+  //   { cityUnicResults }
+  // );
   if (cityUnicResults.length) {
     return new Respond(200, cityUnicResults);
     // return { code: 200, data: citiesList };
@@ -27,6 +49,10 @@ const searchCitiesByString = async (searchStr) => {
     return new Respond(404, "", "no cities wasn't found");
   }
 };
+
+// const searchResultFromDb = async (searchStr) => {
+//   return await citySearch.readOne({ searchStr });
+// };
 
 const getCitiesList = async () => {
   const citiesList = await city.read();

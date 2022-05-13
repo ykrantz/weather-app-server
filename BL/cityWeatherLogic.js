@@ -25,7 +25,6 @@ const getCityWeatherByName = async (cityName) => {
     if (
       hoursDifrance(Date.now(), cityWeatherDetails?.updatedAt.getTime()) <=
       HOURS_DELTA_TO_UPDATE
-      // cityWeatherDetails?.updatedAt.toDateString() === new Date().toDateString()
     ) {
       // if city weather already update in server:
       console.log("have already  update weather in DB");
@@ -177,6 +176,7 @@ const updateCityWeatherInDb = async (data) => {
   } else {
     console.log("city was already exist in DB", "****");
     const cityWeather_id = cityWeather.readOne({ city: city_id });
+    console.log({ city_id });
 
     if (cityWeather_id) {
       updatedCityWeather = await cityWeather.update(city_id, {

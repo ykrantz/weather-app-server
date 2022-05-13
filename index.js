@@ -4,6 +4,8 @@ const bodyParser = require("body-parser");
 
 const cityRoute = require("./Routes/cityRoute");
 const cityWeatherRoute = require("./Routes/cityWeatherRoute");
+const userRoute = require("./Routes/userRoute");
+const userFavoritesRoute = require("./Routes/userFavoritesRoute");
 
 require("dotenv").config();
 
@@ -18,6 +20,8 @@ app.use(cors());
 
 app.use("/api/city", cityRoute);
 app.use("/api/cityWeather", cityWeatherRoute);
+app.use("/api/user", userRoute);
+app.use("/api/userFavorites", userFavoritesRoute);
 // app.use("/api/city", cityWeatherRoute);
 
 require("./DL/db")

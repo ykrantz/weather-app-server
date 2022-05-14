@@ -13,15 +13,16 @@ const city = require("../DL/controllers/cityController");
 // };
 
 const getAllFavoriteCitiesOfUser = async (userDetails) => {
+  // console.log({ userDetails });
   const userId = userDetails?._id;
   const existUser = await user.readOne({ _id: userId });
   if (existUser) {
-    const FavoriteCities = await userFavorites.readAndPopulate(
+    const userFavoriteCities = await userFavorites.readOneAndPopulate(
       { user: existUser._id },
       "",
       "favoriteCities"
     );
-    return new Respond(200, FavoriteCities.favoriteCities);
+    return new Respond(200, userFavoriteCities?.favoriteCities);
   } else {
     // return { code: 404, data: "no cities wasn't found" };
     return new Respond(404, "", "user doesn't exist");
@@ -29,11 +30,14 @@ const getAllFavoriteCitiesOfUser = async (userDetails) => {
 };
 
 const addCityToUserFavorite = async (userDetails, cityName) => {
-  console.log("ADDDD");
+  // console.log("ADDDD");
+  // console.log({ userDetails }, { cityName });
   const userId = userDetails?._id;
   const city_id = await city.readOne({ name: cityName.toLowerCase() }, "_id");
-  console.log({ city_id }, { userId });
+  // console.log({ city_id }, { userId });
+
   if (city_id) {
+    //   if city exist on DB, will add city to favorite:
     const existUserCityFavorites = await userFavorites.readOne({
       user: userId,
     });
@@ -44,12 +48,17 @@ const addCityToUserFavorite = async (userDetails, cityName) => {
 
       newUserCityFavorites = await userFavorites.create({
         user: userId,
-        $push: { favoriteCities: city_id },
+        favoriteCities: [city_id],
       });
+      console.log("user favorite was created", { newUserCityFavorites });
     } else {
       // if favortie for user  exist=> update it
-      checkIfCityAlreadyExistInFavorite(userId, city_id);
-      if (!checkIfCityAlreadyExistInFavorite) {
+      const cityFavoriteExist = await checkIfCityAlreadyExistInFavorite(
+        userId,
+        city_id
+      );
+      console.log({ cityFavoriteExist });
+      if (!cityFavoriteExist) {
         newUserCityFavorites = await userFavorites.update(
           existUserCityFavorites._id,
           { $push: { favoriteCities: city_id } }
@@ -81,6 +90,7 @@ const addCityToUserFavorite = async (userDetails, cityName) => {
 
 const checkIfCityAlreadyExistInFavorite = async (userId, city_Id) => {
   // TODO: why if city doesnr exist i get message of exist
+  console.log({ userId }, { city_Id }, "444");
   const cityAlreadyInFavorite = await userFavorites.readOne({
     user: userId,
     favoriteCities: { $in: city_Id },

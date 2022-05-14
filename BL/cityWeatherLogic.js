@@ -103,6 +103,7 @@ const getCityWeatherById = async (id) => {
 // side functions:
 
 const getCityWeatherFromApiAndUpdateDb = async (cityName) => {
+  console.log({ cityName }, "66");
   const cityWeatherDitails = await getCityWeatherFromApi(cityName);
   if (!cityWeatherDitails) {
     // if cuty does't exist in api:
@@ -115,9 +116,10 @@ const getCityWeatherFromApiAndUpdateDb = async (cityName) => {
     console.log("didn't find city weather in API");
     return false;
   }
-
+  // console.log({ cityWeatherDitails });
   const updateCityWeather = await updateCityWeatherInDb(cityWeatherDitails);
   console.log("city weather was update in server");
+  console.log("555", { updateCityWeather });
 
   const filter = { _id: updateCityWeather._id };
   //  get the updated ditails from DB and populate:
@@ -135,6 +137,7 @@ const getCityWeatherFromApiAndUpdateDb = async (cityName) => {
 const updateCityWeatherInDb = async (data) => {
   // look for city _ID
   // console.log(data.location, "loc");
+  // console.log({ data }, "7777");
   const { region, woeid, country, lat, long, timezone_id } = data.location;
   const cityName = data?.location?.city.toLowerCase();
   // console.log({ cityName }, "****", data.location);
@@ -175,17 +178,27 @@ const updateCityWeatherInDb = async (data) => {
     console.log("cityweather was created  in DB");
   } else {
     console.log("city was already exist in DB", "****");
-    const cityWeather_id = cityWeather.readOne({ city: city_id });
-    console.log({ city_id });
+    const cityWeather_id = await cityWeather.readOne({ city: city_id });
+    // console.log({ city_id });
 
     if (cityWeather_id) {
-      updatedCityWeather = await cityWeather.update(city_id, {
+      updatedCityWeather = await cityWeather.update(cityWeather_id._id, {
         daysWeather: data.forecasts,
       });
+      // console.log(
+      //   { city_id },
+      //   { cityWeather_id },
+      //   { updatedCityWeather },
+      //   "888"
+      // );
 
       console.log("cityweather was upddated in server :");
     } else {
       // if city weather never was update in server
+      const newData = {
+        city: city_id,
+        daysWeather: data.forecasts,
+      };
       console.log("no record of weater city in server");
       updatedCityWeather = await cityWeather.create(newData);
       console.log("cityweather was created  in server");

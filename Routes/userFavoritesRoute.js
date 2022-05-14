@@ -20,9 +20,16 @@ router.get("/", async (req, res) => {
 
 // get all favorite city
 // TODO: change to get with header
-router.get("/favoritecities", async (req, res) => {
+router.post("/favoritecities", async (req, res) => {
   try {
-    const favoritecities = await userFavorites.getAllFavoriteCities();
+    // TODO: when add JWT to change to get anf get user from heade
+    // TODO:. and change the variable that pass to function
+
+    const userDetails = req?.body?.body;
+    const favoritecities = await userFavorites.getAllFavoriteCitiesOfUser(
+      userDetails
+    );
+    console.log({ favoritecities }, req.body);
     res
       .status(favoritecities?.code)
       .json(favoritecities?.data || favoritecities?.message);
@@ -32,10 +39,12 @@ router.get("/favoritecities", async (req, res) => {
   }
 });
 
-router.put("/addcitytofavorite", async (req, res) => {
+router.put("/addcitytofavorite/:cityName", async (req, res) => {
   try {
     console.log("$$$");
-    const { cityName, user } = req.body;
+    const cityName = req.params.cityName;
+    console.log("12", req.body);
+    const user = req.body.body;
     const newFavotiteList = await userFavorites.addCityToUserFavorite(
       user,
       cityName

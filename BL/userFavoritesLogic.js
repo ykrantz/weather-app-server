@@ -13,9 +13,10 @@ const city = require("../DL/controllers/cityController");
 // };
 
 const getAllFavoriteCitiesOfUser = async (userDetails) => {
-  // console.log({ userDetails });
   const userId = userDetails?._id;
   const existUser = await user.readOne({ _id: userId });
+  console.log({ userId }, { existUser });
+
   if (existUser) {
     const userFavoriteCities = await userFavorites.readOneAndPopulate(
       { user: existUser._id },

@@ -24,8 +24,8 @@ router.post("/favoritecities", async (req, res) => {
   try {
     // TODO: when add JWT to change to get anf get user from heade
     // TODO:. and change the variable that pass to function
-
     const userDetails = req?.body?.body;
+
     const favoritecities = await userFavorites.getAllFavoriteCitiesOfUser(
       userDetails
     );

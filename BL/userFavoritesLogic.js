@@ -76,7 +76,7 @@ const addCityToUserFavorite = async (userDetails, cityName) => {
     //   { favoriteCities: city_id }
     //   //   { $push: { favoriteCities: city_id } }
     // );
-    const newUserCityFavoritesPopulate = await userFavorites.readAndPopulate(
+    const newUserCityFavoritesPopulate = await userFavorites.readOneAndPopulate(
       { _id: newUserCityFavorites._id },
       "",
       "favoriteCities"

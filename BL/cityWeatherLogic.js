@@ -103,7 +103,7 @@ const getCityWeatherById = async (id) => {
 // side functions:
 
 const getCityWeatherFromApiAndUpdateDb = async (cityName) => {
-  console.log({ cityName }, "66");
+  // console.log({ cityName }, "66");
   const cityWeatherDitails = await getCityWeatherFromApi(cityName);
   if (!cityWeatherDitails) {
     // if cuty does't exist in api:

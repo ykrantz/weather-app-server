@@ -29,7 +29,7 @@ router.post("/favoritecities", async (req, res) => {
     const favoritecities = await userFavorites.getAllFavoriteCitiesOfUser(
       userDetails
     );
-    console.log({ favoritecities }, req.body);
+    // console.log({ favoritecities }, req.body);
     res
       .status(favoritecities?.code)
       .json(favoritecities?.data || favoritecities?.message);
@@ -43,9 +43,29 @@ router.put("/addcitytofavorite/:cityName", async (req, res) => {
   try {
     console.log("$$$");
     const cityName = req.params.cityName;
-    console.log("12", req.body);
+    // console.log("12", req.body);
     const user = req.body.body;
+    // console.log({ user });
     const newFavotiteList = await userFavorites.addCityToUserFavorite(
+      user,
+      cityName
+    );
+    res
+      .status(newFavotiteList?.code)
+      .json(newFavotiteList?.data || newFavotiteList?.message);
+  } catch (e) {
+    console.log(e);
+    res.status(500).json({ message: "internal server eror" });
+  }
+});
+
+router.put("/deldetcitytofavorite/:cityName", async (req, res) => {
+  try {
+    console.log("$$$");
+    const cityName = req.params.cityName;
+    const user = req.body.body;
+    // console.log("12", req.body, user, 13);
+    const newFavotiteList = await userFavorites.deleteCityToUserFavorite(
       user,
       cityName
     );

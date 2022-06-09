@@ -8,7 +8,7 @@ const createUser = async (userDetails) => {
 
   if (userName && password) {
     const newUser = await user.create({ userName, password });
-    console.log({ newUser });
+    // console.log({ newUser });
     if (newUser) {
       return new Respond(200, newUser);
     } else {
